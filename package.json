@@ -9,6 +9,7 @@
   },
   "scripts": {
     "commit": "git-cz",
+    "prepare": "npm run build",
     "prebuild": "rimraf dist",
     "develop": "npm-run-all --parallel start examples:serve examples:watch",
     "start": "webpack-dev-server --config webpack.dev.babel.js",
