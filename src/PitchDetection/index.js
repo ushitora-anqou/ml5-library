@@ -40,6 +40,8 @@ class PitchDetection {
      */
     this.stream = stream;
     this.frequency = null;
+    this.inputBuffer = null;
+    this.currentTime = null;
     this.ready = callCallback(this.loadModel(model), callback);
   }
 
@@ -76,6 +78,7 @@ class PitchDetection {
   }
 
   async processMicrophoneBuffer(event) {
+    const curTime = this.audioContext.currentTime;
     await tf.nextFrame();
     /**
      * The current pitch prediction results from the classification model.
@@ -117,6 +120,8 @@ class PitchDetection {
 
         const frequency = (confidence > 0.5) ? predictedHz : null;
         this.frequency = frequency;
+        this.inputBuffer = event.inputBuffer;
+        this.currentTime = curTime;
       });
     });
   }
@@ -129,11 +134,11 @@ class PitchDetection {
   async getPitch(callback) {
     await this.ready;
     await tf.nextFrame();
-    const { frequency } = this;
+    const { frequency, inputBuffer, currentTime } = this;
     if (callback) {
-      callback(undefined, frequency);
+      callback(undefined, frequency, inputBuffer, currentTime);
     }
-    return frequency;
+    return [frequency, inputBuffer, currentTime];
   }
 
   static resample(audioBuffer, onComplete) {
